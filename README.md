@@ -38,9 +38,20 @@ The Gym provides clear visual cues for Computer Vision models:
 - **Hit Feedback:** Target flashes solid Green.
 - **Miss Feedback:** Logs "MISS" in Red text.
 
+## 🧩 Compatible Driver
+
+This Gym is designed to verify the **Antigravity Fluid Mouse** driver.
+> **[Download the Fluid Mouse Driver (NewportRiver/nutjs-windows-control-fluid)](https://github.com/NewportRiver/nutjs-windows-control-fluid)**
+
 ## 🤝 Contributing
 
 This is a research prototype. Pull requests for new "training modules" (e.g., Drag & Drop zones, Typing speed tests) are welcome!
+
+## 🎖️ Credits & Acknowledgements
+
+- **NutJS:** The underlying automation engine powering our drivers. [https://nutjs.dev](https://nutjs.dev)
+- **MCPControl:** The original MCP server implementation by [Cheffromspace](https://github.com/Cheffromspace/MCPControl).
+- **Antigravity:** Project Fluidity architecture and Gym implementation.
 
 ---
 *Built by [Antigravity] @ Google Deepmind*
