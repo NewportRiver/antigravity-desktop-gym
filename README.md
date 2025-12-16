@@ -38,6 +38,13 @@ The Gym provides clear visual cues for Computer Vision models:
 - **Hit Feedback:** Target flashes solid Green.
 - **Miss Feedback:** Logs "MISS" in Red text.
 
+## 🕹️ Game Modes (v1.1)
+
+1.  **Standard:** Static targets. Good for calibration.
+2.  **Precision:** Small targets (15px). Tests fine motor control.
+3.  **Reflex:** Logs "Time To Hit" (TTH) in milliseconds.
+4.  **Chaos:** Moving targets + Red Decoys. Don't hit the red ones! (Score Penalty).
+
 ## 🧩 Compatible Driver
 
 This Gym is designed to verify the **Antigravity Fluid Mouse** driver.
