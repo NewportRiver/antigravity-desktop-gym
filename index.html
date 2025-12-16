@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antigravity Desktop Gym</title>
+    <style>
+        :root {
+            --bg-color: #0f0f13;
+            --text-color: #e0e0e0;
+            --accent-color: #00ff9d;
+            --error-color: #ff0055;
+            --grid-color: #2a2a35;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', 'Roboto', monospace;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none; /* Prevent text selection during drag tests */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Calibration Grid Background */
+        .grid-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        #ui-layer {
+            z-index: 10;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            pointer-events: none; /* Let clicks pass through to targets */
+        }
+
+        .panel {
+            background: rgba(15, 15, 19, 0.9);
+            border: 1px solid var(--grid-color);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            pointer-events: auto;
+            width: 300px;
+        }
+
+        h1 { margin: 0 0 10px 0; font-size: 1.2rem; color: var(--accent-color); text-transform: uppercase; letter-spacing: 2px; }
+        
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9rem; }
+        .stat-val { font-family: monospace; color: var(--accent-color); }
+
+        #target-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+        }
+
+        .target {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 255, 157, 0.1);
+            border: 2px solid var(--accent-color);
+            border-radius: 50%;
+            transform: translate(-50%, -50%); /* Center on coordinate */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: crosshair;
+            transition: background 0.2s, box-shadow 0.2s;
+            box-shadow: 0 0 15px rgba(0, 255, 157, 0.2);
+        }
+
+        .target:hover {
+            background: rgba(0, 255, 157, 0.3);
+        }
+
+        .target.hit {
+            background: var(--accent-color);
+            box-shadow: 0 0 30px var(--accent-color);
+        }
+
+        /* Center crosshair of the target */
+        .target::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        #log-area {
+            height: 150px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #888;
+            border-top: 1px solid var(--grid-color);
+            margin-top: 10px;
+            padding-top: 5px;
+        }
+
+        .log-entry { margin: 2px 0; }
+        .log-hit { color: var(--accent-color); }
+        .log-miss { color: var(--error-color); }
+
+    </style>
+</head>
+<body>
+
+    <div class="grid-bg"></div>
+
+    <div id="ui-layer">
+        <div class="panel">
+            <h1>Status</h1>
+            <div class="stat-row"><span>State:</span> <span id="status-text" class="stat-val">READY</span></div>
+            <div class="stat-row"><span>Score:</span> <span id="score-val" class="stat-val">0</span></div>
+            <div class="stat-row"><span>Mouse:</span> <span id="mouse-coords" class="stat-val">0, 0</span></div>
+            <div style="margin-top: 15px;">
+                <button id="btn-reset" style="background: var(--grid-color); color: #fff; border: 1px solid #fff; padding: 5px 15px; cursor: pointer;">Reset Gym</button>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h1>Logs</h1>
+            <div id="log-area"></div>
+        </div>
+    </div>
+
+    <div id="target-container">
+        <!-- Targets will appear here -->
+        <div id="primary-target" class="target" style="left: 50%; top: 50%;"></div>
+    </div>
+
+    <script>
+        const target = document.getElementById('primary-target');
+        const mouseCoords = document.getElementById('mouse-coords');
+        const logArea = document.getElementById('log-area');
+        const scoreVal = document.getElementById('score-val');
+        
+        let score = 0;
+
+        // Track global mouse position for debugging
+        document.addEventListener('mousemove', (e) => {
+            mouseCoords.textContent = `${e.clientX}, ${e.clientY}`;
+        });
+
+        function log(msg, type = 'info') {
+            const entry = document.createElement('div');
+            entry.classList.add('log-entry');
+            if (type === 'hit') entry.classList.add('log-hit');
+            if (type === 'miss') entry.classList.add('log-miss');
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            logArea.prepend(entry);
+        }
+
+        function moveTarget() {
+            // Margin to keep it away from edges
+            const margin = 100;
+            const maxX = window.innerWidth - margin;
+            const maxY = window.innerHeight - margin;
+            const minX = margin;
+            const minY = margin;
+
+            const newX = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
+            const newY = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
+
+            target.style.left = `${newX}px`;
+            target.style.top = `${newY}px`;
+            
+            log(`Target moved to: ${newX}, ${newY}`);
+            return { x: newX, y: newY };
+        }
+
+        target.addEventListener('click', (e) => {
+            // Visual feedback
+            target.classList.add('hit');
+            setTimeout(() => target.classList.remove('hit'), 200);
+
+            score++;
+            scoreVal.textContent = score;
+            
+            // Calculate accuracy (distance from center of target)
+            // target rect
+            const rect = target.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const dist = Math.sqrt(Math.pow(e.clientX - centerX, 2) + Math.pow(e.clientY - centerY, 2));
+
+            log(`HIT! Offset: ${dist.toFixed(1)}px`, 'hit');
+            
+            // Move after short delay
+            setTimeout(moveTarget, 500);
+        });
+
+        // Click anywhere else logic (Miss)
+        document.addEventListener('click', (e) => {
+            if (e.target === target || e.target.closest('.panel')) return;
+            log(`MISS at ${e.clientX}, ${e.clientY}`, 'miss');
+        });
+
+        document.getElementById('btn-reset').addEventListener('click', () => {
+            score = 0;
+            scoreVal.textContent = score;
+            log('Gym Reset');
+            // Center target
+            target.style.left = '50%';
+            target.style.top = '50%';
+        });
+
+        // Initialize
+        log('Gym Initialized. Waiting for agent...');
+        
+        // Log window size for calibration
+        log(`Viewport: ${window.innerWidth}x${window.innerHeight}`);
+
+    </script>
+</body>
+</html>
