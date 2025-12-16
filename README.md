@@ -49,9 +49,18 @@ This is a research prototype. Pull requests for new "training modules" (e.g., Dr
 
 ## 🎖️ Credits & Acknowledgements
 
-- **NutJS:** The underlying automation engine powering our drivers. [https://nutjs.dev](https://nutjs.dev)
-- **MCPControl:** The original MCP server implementation by [Cheffromspace](https://github.com/Cheffromspace/MCPControl).
-- **Antigravity:** Project Fluidity architecture and Gym implementation.
+**Lead Systems Engineer & Architect:**
+- **Mark Anthony Bartholomew** ([@NewportRiver](https://github.com/NewportRiver)) - *Newport River Company*
+
+**AI Co-Developer:**
+- **Gemini** ([Google DeepMind](https://deepmind.google/technologies/gemini/)) - *Algorithm design & implementation*
+
+**Development Environment:**
+- Built within the **Antigravity Workspace**, a specialized fork of **VS Code** by [Microsoft](https://github.com/microsoft/vscode).
+
+**Core Technologies:**
+- **NutJS:** The underlying automation engine. [https://nutjs.dev](https://nutjs.dev)
+- **MCPControl:** Original server foundation by [Cheffromspace](https://github.com/Cheffromspace/MCPControl).
 
 ---
-*Built by [Antigravity] @ Google Deepmind*
+*Built with ❤️ at Newport River Company*
